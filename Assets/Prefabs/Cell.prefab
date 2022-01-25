@@ -146,8 +146,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: b1155ddf33a09c7448af9d5e251c5eb9, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -184,3 +184,9 @@ MonoBehaviour:
   Six: {r: 0, g: 0.5019608, b: 0.5019608, a: 1}
   Seven: {r: 0, g: 0, b: 0, a: 1}
   Eight: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
+  _Flag: {fileID: 21300000, guid: fe550b611d54fb94286f85ea78ccaad6, type: 3}
+  _Unknown: {fileID: 21300000, guid: b1155ddf33a09c7448af9d5e251c5eb9, type: 3}
+  _Bomb: {fileID: 21300000, guid: cf518b01891e25145bdf2e385a2603e7, type: 3}
+  _SpecialBomb: {fileID: 21300000, guid: b91d425f3c7c2674daa1581a3b7662ef, type: 3}
+  _Blank: {fileID: 21300000, guid: 4783f811a618f66419def91d180e648a, type: 3}
+  img: {fileID: 0}
