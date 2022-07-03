@@ -109,6 +109,8 @@ public class Cell : MonoBehaviour,IPointerDownHandler,IPointerUpHandler
             return;
         }
 
+        Revealed = true;
+
         // if this is the first click of the game then generate the board around this cell to ensure that the first click is always safe
         if (BG._GameState == BoardGenerator.GameState.ListBuild) 
         {
@@ -161,7 +163,6 @@ public class Cell : MonoBehaviour,IPointerDownHandler,IPointerUpHandler
         }
 
         // set this cells reveald state to true
-        Revealed = true;
 
         // check if the game is won or lost
         BG.CheckWin();

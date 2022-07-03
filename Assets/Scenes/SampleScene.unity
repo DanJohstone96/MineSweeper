@@ -566,73 +566,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 499234704}
   m_CullTransparentMesh: 1
---- !u!1 &689232872
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 689232874}
-  - component: {fileID: 689232873}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &689232873
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 689232872}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1842244b1f26bdc40a74a895b3f4825e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _Type: 0
-  BombCloseCount: 0
-  BG: {fileID: 0}
-  index: {x: 0, y: 0}
-  MyText: {fileID: 0}
-  MyString: 
-  Revealed: 0
-  Flag: 0
-  One: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 0}
-  Two: {r: 0.75294125, g: 0.75294125, b: 0.75294125, a: 0}
-  Three: {r: 0, g: 0, b: 0, a: 0}
-  Founr: {r: 0, g: 0, b: 0, a: 0}
-  Five: {r: 0, g: 0, b: 0, a: 0}
-  Six: {r: 0, g: 0, b: 0, a: 0}
-  Seven: {r: 0, g: 0, b: 0, a: 0}
-  Eight: {r: 0, g: 0, b: 0, a: 0}
-  _Flag: {fileID: 0}
-  _Unknown: {fileID: 0}
-  _Bomb: {fileID: 0}
-  _SpecialBomb: {fileID: 0}
-  _Blank: {fileID: 0}
-  img: {fileID: 0}
-  LMD: 0
-  RMD: 0
---- !u!4 &689232874
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 689232872}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2235.1938, y: 1783.2096, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &710723666
 GameObject:
   m_ObjectHideFlags: 0
@@ -1363,6 +1296,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1528285053}
   - component: {fileID: 1528285054}
+  - component: {fileID: 1528285055}
   m_Layer: 5
   m_Name: Popup
   m_TagString: Untagged
@@ -1406,6 +1340,20 @@ MonoBehaviour:
   Screen: {fileID: 1723676817}
   WinColor: {r: 0.07450981, g: 0.7921569, b: 0.09411765, a: 1}
   LooseColor: {r: 0.7921569, g: 0.07450981, b: 0.09411765, a: 1}
+--- !u!114 &1528285055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1528285052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e94f7ecbf025af3488027fba90c6e339, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DragRect: {fileID: 1528285053}
+  Canvas: {fileID: 1741657492}
 --- !u!1 &1574060068
 GameObject:
   m_ObjectHideFlags: 0
