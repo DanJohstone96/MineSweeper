@@ -70,6 +70,10 @@ public class BoardGenerator : MonoBehaviour
 	// Public reference to timer class
 	public Timer _Timer;
 
+    public Text _BestTime;
+
+    public GameObject _BestTimeDisplay;
+
     void Start()
     {
         BoardGen(false);
@@ -174,6 +178,7 @@ public class BoardGenerator : MonoBehaviour
         {
             OldIndex.Add(vec);
         }
+        //ShowBombs();
         SetNumbers();
     }
 
@@ -208,6 +213,7 @@ public class BoardGenerator : MonoBehaviour
         _GameState = GameState.Idle;
         SW.Stop();
         UnityEngine.Debug.Log($"Elapsed time {SW.ElapsedMilliseconds}");
+        //ShowEmpty();
     }
 
     // reveals all bombs on the board
@@ -303,11 +309,42 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
+    private void ShowBombs() 
+    {
+        foreach (Cell cell in Bombs) 
+        {
+            Text CellText = cell.GetComponentInChildren<Text>();
+            CellText.text = "B";
+        }
+    }
+
     // set the game state to lost
     public void Loose() 
     {
         _GameState = GameState.Lost;
         UnityEngine.Debug.Log("BG.Loose called");
+        _BestTimeDisplay.SetActive(false);
+    }
+
+    private void GameWin() 
+    {
+        float winTime = _Timer.TimeCounter;
+
+        float BestTime = PlayerPrefs.GetFloat("BestTime");
+        _BestTimeDisplay.SetActive(true);
+
+        UnityEngine.Debug.Log($"Stored best time = {PlayerPrefs.GetFloat("BestTime")}");
+
+        if (BestTime == 0 || winTime < BestTime)
+        {
+            _BestTime.text = $"New Record - {winTime}";
+            PlayerPrefs.SetFloat("BestTime", winTime);
+            UnityEngine.Debug.Log($"Best time is now set to {(int)PlayerPrefs.GetFloat("BestTime")}");
+        }
+        else 
+        {
+            _BestTime.text = $"Previous Best Time - {winTime}";
+        }
     }
 
     // clear the game board and all associated lists.
@@ -374,6 +411,7 @@ public class BoardGenerator : MonoBehaviour
             _GameState = GameState.Won;
             PC.Open(true);
             StartCoroutine(FaceChange(false,Win));
+            GameWin();
         }
     }
 

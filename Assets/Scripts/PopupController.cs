@@ -8,6 +8,8 @@ public class PopupController : MonoBehaviour
 	// Reference to the title text of the popup box
 	public Text Title;
 
+    public Text BestTime;
+
 	// Reference to the Popups gameobject
 	public GameObject Screen;
 
@@ -24,6 +26,7 @@ public class PopupController : MonoBehaviour
     // openes up the popup and sets the text and colour based on the result passed in.
 	public void Open(bool Result) 
     {
+        transform.localPosition = Vector3.zero;
         Screen.SetActive(true);
         if (Result)
         {
