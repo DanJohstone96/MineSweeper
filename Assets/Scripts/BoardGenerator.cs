@@ -7,79 +7,89 @@ using System.Diagnostics;
 
 public class BoardGenerator : MonoBehaviour
 {
-	//Cell Prefab used in board generation
-	public GameObject _Cell;
+    public enum GameState { Gen, ListBuild, Idle, Running, Lost, Won }
 
-	//List of all cells
-	public List<Cell> cells = new List<Cell>();
+    public int usedFlags => _usedFlags;
 
-	//List of all bombs
-	public List<Cell> Bombs = new List<Cell>();
+    [Header("Board Settings")]
+    [SerializeField]
+    private int RowCount = 16;
+    [SerializeField]
+    private int ColumnCount = 30;
+    [SerializeField]
+    private int MaxBombCount;
+    [SerializeField]
+    private List<Sprite> FaceSprites = new List<Sprite>();
+    [SerializeField]
+    private Image TopFace;
+    [SerializeField]
+    private Text FlagText;
+    [SerializeField]
+    private Timer _Timer;
+    [SerializeField]
+    private Transform GameBody;
 
-	// 2d list of game board
-	public List<List<Cell>> GridList = new List<List<Cell>>();
+    [Header("Board Info")]
+    [SerializeField]
+    private GameState _GameState;
+    [SerializeField]
+    private GameObject _Cell;
+    [SerializeField]
+    private List<Cell> cells = new List<Cell>();
+    [SerializeField]
+    private List<Cell> Bombs = new List<Cell>();
+    [SerializeField]
+    private List<List<Cell>> GridList = new List<List<Cell>>();
+    [SerializeField]
+    private List<Cell> FlatList = new List<Cell>();
+    [SerializeField]
+    private List<Vector2> BombIndex = new List<Vector2>();
+    
+    [SerializeField]
+    private List<Vector2> OldIndex = new List<Vector2>();
 
-	// flattened version of the 2d list used for bomb generation
-	public List<Cell> FlatList = new List<Cell>();
 
-	// list of bomb locations in the grid list
-	public List<Vector2> BombIndex = new List<Vector2>();
+    private int AllowedFlags => MaxBombCount;
+    private int _usedFlags;
+	// stopwatch for assesing loading times
+	private Stopwatch SW;
 
-	// number of rows and columns to generate (Currently fixed could be expanded later)
-	public int RowCount = 16;
-    public int ColumnCount = 30;
-    //public int CellCount = 480;
-
-    public Transform GameBody;
-
-    // maximum number of bombs to add to grid (Currently fixed could be expanded later)
-    public int MaxBombCount;
-    public int BombsAdded;
-
-    // a collection of Sprites for the face at the top of the board
-    public Sprite Happy;
-    public Sprite Dead;
-    public Sprite Shock;
-    public Sprite Win;
-
-    //Reference to the image component of the game face
-    public Image TopFace;
-
-    public enum GameState {Gen,ListBuild,Idle,Running,Lost, Won }
-	//The current Game State
-	public GameState _GameState;
-
-	// this is used to set the maximum number of allowed flags.
-	public int AllowedFlags = 99;
-
-	// int to store the current ammount of used flags
-	public int usedFlags;
-
-	// reference to the text tracking the flag count in the UI.
-	public Text FlagText;
-
-	// reference to the popup controller for when the game ends.
-	public PopupController PC;
-
-	// Vector 2 list that stores the index of bombs form the previous game board
-	public List<Vector2> OldIndex = new List<Vector2>();
-
-	// public stopwatch for assesing loading times
-	public Stopwatch SW;
-
-	// Public reference to timer class
-	public Timer _Timer;
-
-    public Text _BestTime;
-
-    public GameObject _BestTimeDisplay;
-
-    void Start()
-    {
+    private void Start()
+    {      
         BoardGen(false);
     }
 
-    // generates the initial game board visual ready for the users first click
+#if UNITY_EDITOR
+
+    private void Update()
+	{
+        if (Input.GetKeyDown(KeyCode.W)) 
+        {
+            AutoWin();
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            ShowEmpty();
+        }
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+           ShowBombs();
+        }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            PlayerPrefs.DeleteAll();
+        }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            FlagAllBombs();
+        }
+    }
+#endif
+
+    /// <summary>
+    /// Generate the Initial board.
+    /// </summary>
+    /// <param name="UseOld">If true uses the board layout from a previous game</param>
     private void BoardGen(bool UseOld) 
     {
         
@@ -97,14 +107,14 @@ public class BoardGenerator : MonoBehaviour
             }
             GridList.Add(Row);
         }
-        usedFlags = AllowedFlags;
+        _usedFlags = AllowedFlags;
         FlagText.text = AllowedFlags.ToString("000");
         if (UseOld) 
         {
             foreach (Vector2 chord in OldIndex) 
             {
                 Cell FoundCell = GridList[(int)chord.x][(int)chord.y];
-                FoundCell._Type = Cell.CellType.Bomb;
+                FoundCell.SetCellType(Cell.CellType.Bomb);
                 Text CellText = FoundCell.GetComponentInChildren<Text>();
                 FoundCell.MyString = "B";
 
@@ -119,7 +129,10 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
-    // Builds the Grid list and flat list based of the users initial click
+    /// <summary>
+    /// Builds lists used for game logic.
+    /// </summary>
+    /// <param name="StartIndex">Idex used to find adjacent cells</param>
     public void ListBuild(Vector2 StartIndex) 
     {
         SW = new Stopwatch();
@@ -128,7 +141,7 @@ public class BoardGenerator : MonoBehaviour
 
         List<Cell> cells = new List<Cell>();
        
-        foreach (Vector2 vec in ReturnAdjacentList(StartIndex))
+        foreach (Vector2 vec in ReturnAdjacentArray(StartIndex))
         {
             try
             {
@@ -158,7 +171,9 @@ public class BoardGenerator : MonoBehaviour
         SetBombs();
     }
 
-    // sets the bombs randomly based on the max bomb count
+    /// <summary>
+    /// Sets random cells to bombs
+    /// </summary>
     private void SetBombs() 
     {
         for (int i =0; i < MaxBombCount;i++) 
@@ -167,28 +182,29 @@ public class BoardGenerator : MonoBehaviour
 
             Cell FoundCell = FlatList[index];
 
-            FoundCell._Type = Cell.CellType.Bomb;
+            FoundCell.SetCellType(Cell.CellType.Bomb);
 
             Bombs.Add(FoundCell);
             BombIndex.Add(FoundCell.index);
             FlatList.RemoveAt(index);
         }
 
-        foreach (Vector3 vec in BombIndex) 
+        foreach (Vector2 vec in BombIndex) 
         {
             OldIndex.Add(vec);
         }
-        //ShowBombs();
         SetNumbers();
     }
 
-    // Sets the bomb numbers for cells that are adjacent to bombs 
+    /// <summary>
+    /// Sets the bomb numbers for cells adjacent to bombs
+    /// </summary>
     private void SetNumbers() 
     {
         for (int i = 0;i<BombIndex.Count;i++) 
         {
             Vector2 indexPair = BombIndex[i];
-            Vector2[] cellsToCheck = ReturnAdjacentList(indexPair);
+            Vector2[] cellsToCheck = ReturnAdjacentArray(indexPair);
 
             foreach (Vector2 index in cellsToCheck) 
             {
@@ -196,10 +212,10 @@ public class BoardGenerator : MonoBehaviour
                 {
                     Cell FoundCell = GridList[(int)index.x][(int)index.y];
                    
-                    if (FoundCell._Type != Cell.CellType.Bomb) 
+                    if (FoundCell.ReturnType() != Cell.CellType.Bomb) 
                     {
                         FoundCell.BombCloseCount += 1;
-                        FoundCell._Type = Cell.CellType.Number;
+                        FoundCell.SetCellType(Cell.CellType.Number);
 
                         FoundCell.MyString = FoundCell.BombCloseCount.ToString();
                     }
@@ -212,11 +228,13 @@ public class BoardGenerator : MonoBehaviour
         }
         _GameState = GameState.Idle;
         SW.Stop();
-        UnityEngine.Debug.Log($"Elapsed time {SW.ElapsedMilliseconds}");
-        //ShowEmpty();
+        UnityEngine.Debug.Log($"Elapsed time {SW.ElapsedMilliseconds} Ms");
     }
 
-    // reveals all bombs on the board
+    /// <summary>
+    /// Method to reveal bombs on game loss
+    /// </summary>
+    /// <param name="_cell">The cell that lost the game</param>
     public void RevealAllBombs(Cell _cell) 
     {
         foreach (Cell cell in Bombs) 
@@ -228,17 +246,20 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
-    // checks cells adjacent to the index and reveals them if they are not a bomb
+    /// <summary>
+    /// Used to check adjacent cells of the cell at the given index
+    /// </summary>
+    /// <param name="index">Index of origin cell to check</param>
     public void CheckAdjacentCells(Vector2 index) 
     {
-        Vector2[] cellsToCheck = ReturnAdjacentList(index);
+        Vector2[] cellsToCheck = ReturnAdjacentArray(index);
 
         foreach (Vector2 cell in cellsToCheck)
         {
             try
             {
                 Cell CurrentCell = GridList[(int)cell.x][(int)cell.y];
-                if (!CurrentCell.Revealed && CurrentCell._Type != Cell.CellType.Bomb)
+                if (!CurrentCell.Revealed && CurrentCell.ReturnType() != Cell.CellType.Bomb)
                 {
                     CurrentCell.Reveal();
                 }
@@ -250,10 +271,13 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
-    // Reveals all adjacent cells to the index cell
+    /// <summary>
+    /// Reveals all cells around surrounding cell
+    /// </summary>
+    /// <param name="index">Index of origin cell to reveal from</param>
     public void RevealSurrounding(Vector2 index) 
     {
-        Vector2[] cellsToCheck = ReturnAdjacentList(index);
+        Vector2[] cellsToCheck = ReturnAdjacentArray(index);
         foreach (Vector2 cell in cellsToCheck)
         {
             try
@@ -271,8 +295,12 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
-    // returns a vector 2 array of all cell indexes adjacent to the start index
-    private Vector2[] ReturnAdjacentList(Vector2 StartIndex) 
+    /// <summary>
+    /// Returns an array of adjacent cell indexes
+    /// </summary>
+    /// <param name="StartIndex">Index of origin cell to return adjacent cells</param>
+    /// <returns>array of adjacent cell indexes</returns>
+    private Vector2[] ReturnAdjacentArray(Vector2 StartIndex) 
     {
         Vector2[] cellsToCheck = new Vector2[]
                     {   
@@ -296,58 +324,111 @@ public class BoardGenerator : MonoBehaviour
         return cellsToCheck;
     }
 
-    // a debug method for showing all empty spaces
+    /// <summary>
+    /// Debug method to win the game
+    /// </summary>
+    private void AutoWin() 
+    {
+        foreach (List<Cell> cells in GridList)
+        {
+            foreach (Cell cell in cells)
+            {
+                if (cell.ReturnType() == Cell.CellType.Bomb)
+                {
+                    cell.SetFlag();
+                }
+                else
+                {
+                    cell.Reveal();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Debug method to show empty spaces
+    /// </summary>
     private void ShowEmpty() 
     {
-        foreach (Cell cell in FlatList) 
+        if (_GameState != GameState.Running) 
         {
-            if (cell._Type == Cell.CellType.Empty) 
+            return;
+        }
+
+        foreach (Cell cell in cells) 
+        {
+            if (cell.ReturnType() == Cell.CellType.Empty) 
             {
-                Text CellText = cell.GetComponentInChildren<Text>();
+                Text CellText = cell.MyText;
                 CellText.text = "E";
             }
         }
     }
 
+    /// <summary>
+    /// Debug Method to show bombs
+    /// </summary>
     private void ShowBombs() 
     {
         foreach (Cell cell in Bombs) 
         {
-            Text CellText = cell.GetComponentInChildren<Text>();
+            Text CellText = cell.MyText;
             CellText.text = "B";
         }
     }
 
-    // set the game state to lost
-    public void Loose() 
+    /// <summary>
+    /// Debug Method To Flag all Bombs
+    /// </summary>
+    private void FlagAllBombs() 
     {
-        _GameState = GameState.Lost;
-        UnityEngine.Debug.Log("BG.Loose called");
-        _BestTimeDisplay.SetActive(false);
+        foreach (Cell cell in Bombs)
+        {
+            cell.SetFlag();
+        }
     }
 
+    /// <summary>
+    /// Sets the game state to loss.
+    /// </summary>
+    public void Loss() 
+    {
+        _GameState = GameState.Lost;
+        UnityEngine.Debug.Log("BG.Loss called");
+    }
+
+    /// <summary>
+    /// Sets the game state to win.
+    /// </summary>
     private void GameWin() 
     {
-        float winTime = _Timer.TimeCounter;
+        float winTime = _Timer.ReturnTime();
 
         float BestTime = PlayerPrefs.GetFloat("BestTime");
-        _BestTimeDisplay.SetActive(true);
 
         UnityEngine.Debug.Log($"Stored best time = {PlayerPrefs.GetFloat("BestTime")}");
-
-        if (BestTime == 0 || winTime < BestTime)
+        if (BestTime == 0)
         {
-            _BestTime.text = $"New Record - {winTime}";
+            PopupController.Instance.SetBestTimeString($"New Record - {winTime}");
+
             PlayerPrefs.SetFloat("BestTime", winTime);
             UnityEngine.Debug.Log($"Best time is now set to {(int)PlayerPrefs.GetFloat("BestTime")}");
         }
-        else 
+        else if (winTime < BestTime) 
         {
-            _BestTime.text = $"Previous Best Time - {winTime}";
+            PopupController.Instance.SetBestTimeString($"New Record - {winTime} \n Previous Best Time - {BestTime}");
+            PlayerPrefs.SetFloat("BestTime", winTime);
+        }
+        else
+        {
+            PopupController.Instance.SetBestTimeString($"Previous Best Time - {BestTime} \n Current Time - {winTime}");
         }
     }
 
-    // clear the game board and all associated lists.
+    /// <summary>
+    /// Method to clear the board for reset
+    /// </summary>
+    /// <param name="UseOld">If true the old board layout will be preserved</param>
     public void ClearBoard(bool UseOld) 
     {
         foreach (Transform child in GameBody) 
@@ -360,9 +441,9 @@ public class BoardGenerator : MonoBehaviour
         GridList.Clear();
         BombIndex.Clear();
         FlatList.Clear();
-        PC.Close();
+        PopupController.Instance.Close();
         _Timer.Reset();
-        TopFace.sprite = Happy;
+        CallFaceChange(false, 0);
         if (UseOld)
         {
             BoardGen(true);
@@ -377,20 +458,25 @@ public class BoardGenerator : MonoBehaviour
 
     }
 
-    // Update the flag display
+    /// <summary>
+    /// Updates the flag display
+    /// </summary>
+    /// <param name="change">number to change display by</param>
     public void FlagChange(int change) 
     {
-        usedFlags -= change;
+        _usedFlags -= change;
         FlagText.text = usedFlags.ToString("000");
     }
 
-    // check the win state of the game and set the game state accordingly 
+     /// <summary>
+     /// Checks the win state of the game
+     /// </summary>
     public void CheckWin() 
     {
         bool result = true;
         foreach (Cell cell in cells) 
         {
-            if (cell._Type == Cell.CellType.Bomb)
+            if (cell.ReturnType() == Cell.CellType.Bomb)
             {
                 if (!cell.Flag)
                 {
@@ -409,34 +495,77 @@ public class BoardGenerator : MonoBehaviour
         if (result) 
         {
             _GameState = GameState.Won;
-            PC.Open(true);
-            StartCoroutine(FaceChange(false,Win));
+            PopupController.Instance.Open(true);
+            CallFaceChange(false,3);
             GameWin();
         }
     }
 
-    // quit the application
-    public void Quit() 
+    /// <summary>
+    /// Used to call the face change coroutine
+    /// </summary>
+    /// <param name="changeBack">If true the face will revert to idle after delay</param>
+    /// <param name="index">index of face sprite</param>
+    public void CallFaceChange(bool changeBack, int index) 
     {
-        Application.Quit();
+        StopAllCoroutines();
+        StartCoroutine(FaceChange(changeBack, index));
     }
 
-    // This function controlls changing the face sprite at the top of the screen.
-    public IEnumerator FaceChange(bool changeBack,Sprite Face) 
+    /// <summary>
+    /// Sets the face sprite to the given index
+    /// </summary>
+    /// <param name="index">Index of face sprite</param>
+    private void SetFace(int index) 
     {
-        Sprite OldFace = TopFace.sprite;
+        TopFace.sprite = FaceSprites[index];
+    }
 
+    /// <summary>
+    /// Coroutine to handle face changing.
+    /// </summary>
+    /// <param name="changeBack">if true the face will change back to idle</param>
+    /// <param name="index">index of face to change</param>
+    /// <returns>null</returns>
+    private IEnumerator FaceChange(bool changeBack,int index) 
+    {        
         if (changeBack)
         {
-            TopFace.sprite = Face;
+            SetFace(index);
             yield return new WaitForSeconds(.15f);
-            TopFace.sprite = Happy;
+            SetFace(0);
 
         }
         else 
         {
-            TopFace.sprite = Face;
+            SetFace(index);
             yield return null;
         }
+    }
+
+    /// <summary>
+    /// Returns the games state
+    /// </summary>
+    /// <returns>Game State</returns>
+    public GameState ReturnGameState() 
+    {
+        return _GameState;
+    }
+
+    /// <summary>
+    /// Sets the state of the game
+    /// </summary>
+    /// <param name="state">State to set</param>
+    public void SetGameState(GameState state) 
+    {
+        _GameState=state;
+    }
+
+    /// <summary>
+    /// Quits application
+    /// </summary>
+    public void Quit()
+    {
+        Application.Quit();
     }
 }

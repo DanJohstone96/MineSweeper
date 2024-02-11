@@ -8,32 +8,23 @@ public class Cell : MonoBehaviour,IPointerDownHandler,IPointerUpHandler
 {
     public enum CellType { Empty,Bomb,Number}
 
-    // The cells type
-    public CellType _Type;
+    [SerializeField]
+    private CellType _Type;
 
-    // how many bombs are adjacent to this cell
     public int BombCloseCount;
 
-    // Reference to the board generator
     public BoardGenerator BG;
 
-    // The cells index in the board generators 2d array
     public Vector2 index;
 
-    // Reference to the cells text component
     public Text MyText;
 
-    // the string of the cell (how many adjacent bombs are there)
     public string MyString;
 
-    // is the cell reveald
     public bool Revealed;
 
-    // is the cell flagged
     public bool Flag;
 
-
-    // Colours to use for each number
     public Color One;
     public Color Two;
     public Color Three;
@@ -43,24 +34,16 @@ public class Cell : MonoBehaviour,IPointerDownHandler,IPointerUpHandler
     public Color Seven;
     public Color Eight;
 
-    // All sprites that can be used for the cell
     public Sprite _Flag;
     public Sprite _Unknown;
     public Sprite _Bomb;
     public Sprite _SpecialBomb;
     public Sprite _Blank;
     
-    //public reference to the cells image
     public Image img;
 
-    // Bools for the left and right mouse buttons
-    public bool LMD;
-    public bool RMD;
-
-    private void Awake()
-	{
-        img = GetComponent<Image>();
-	}
+    private bool LMD;
+    private bool RMD;
 
     // set the cells type
     public void SetCellType(CellType type) 
@@ -87,84 +70,68 @@ public class Cell : MonoBehaviour,IPointerDownHandler,IPointerUpHandler
                 {
                     return;
                 }
-                //MyText.text = "f";
                 img.sprite = _Flag;
                 Flag = true;
                 BG.FlagChange(1);
                 BG.CheckWin();
             }
         }
-        if (BG._GameState == BoardGenerator.GameState.Idle)
+        if (BG.ReturnGameState() == BoardGenerator.GameState.Idle)
         {
-            BG._GameState = BoardGenerator.GameState.Running;
+            BG.SetGameState(BoardGenerator.GameState.Running);
         }
     }
 
     // reveals the clicked cell
     public void Reveal() 
     {
-        // if the game or cell is not in the correct state then return 
-        if (BG._GameState == BoardGenerator.GameState.Won || BG._GameState == BoardGenerator.GameState.Lost || BG._GameState == BoardGenerator.GameState.Gen || Flag) 
+        BoardGenerator.GameState currentState = BG.ReturnGameState();
+
+        if (currentState == BoardGenerator.GameState.Won || currentState == BoardGenerator.GameState.Lost || currentState == BoardGenerator.GameState.Gen || Flag) 
         {
             return;
         }
 
         Revealed = true;
 
-        // if this is the first click of the game then generate the board around this cell to ensure that the first click is always safe
-        if (BG._GameState == BoardGenerator.GameState.ListBuild) 
+        if (currentState == BoardGenerator.GameState.ListBuild) 
         {
             Debug.Log($"Sending index {this.index}");
             BG.ListBuild(this.index);
         }
 
-        // if the cell is flagged then unflag the cell
         if (Flag) 
         {
             SetFlag();
         }
 
-        // set the text colour based on the number of adjacent flags
         SetTextColour(MyText, BombCloseCount);
 
-        // set the sprites display image as blank
         img.sprite = _Blank;
 
-
-        // if the cell type is a number then set the cells string to display the number.
-        if(_Type == CellType.Number)
+        switch (_Type) 
         {
-            MyText.text = MyString;
-
-            StartCoroutine(BG.FaceChange(true, BG.Shock));
-		}
-
-        // if the cell type is empty then continue to check adjacent cells
-		if (_Type == CellType.Empty)
-		{
-			BG.CheckAdjacentCells(index);
-			StartCoroutine(BG.FaceChange(true, BG.Shock));
-		}
-
-        // if the cell type is a bomb then end the game.
-		if (_Type == CellType.Bomb)
-		{
-			img.sprite = _SpecialBomb;
-			BG.RevealAllBombs(this);
-			BG.Loose();
-			BG.PC.Open(false);
-			StartCoroutine(BG.FaceChange(false, BG.Dead));
-		}
-
-        // if the game state is idle then set it to running
-		if (BG._GameState == BoardGenerator.GameState.Idle) 
-        {
-            BG._GameState = BoardGenerator.GameState.Running;
+            case CellType.Number:
+                MyText.text = MyString;
+                BG.CallFaceChange(true,1);
+                break;
+            case CellType.Empty:
+                BG.CheckAdjacentCells(index);
+                BG.CallFaceChange(true, 1);
+                break;
+            case CellType.Bomb:
+                img.sprite = _SpecialBomb;
+                BG.RevealAllBombs(this);
+                BG.Loss();
+                PopupController.Instance.Open(false);
+                BG.CallFaceChange(false, 2);
+                break;
         }
 
-        // set this cells reveald state to true
-
-        // check if the game is won or lost
+		if (currentState == BoardGenerator.GameState.Idle) 
+        {
+            BG.SetGameState(BoardGenerator.GameState.Running);
+        }
         BG.CheckWin();
     }
 
@@ -244,6 +211,15 @@ public class Cell : MonoBehaviour,IPointerDownHandler,IPointerUpHandler
                 txt.color = Eight;
                 break;
         }
-    
+    }
+
+    public CellType ReturnType() 
+    {
+        return _Type;
+    }
+
+    public void SetType(CellType type) 
+    {
+        _Type = type;
     }
 }

@@ -189,4 +189,4 @@ MonoBehaviour:
   _Bomb: {fileID: 21300000, guid: cf518b01891e25145bdf2e385a2603e7, type: 3}
   _SpecialBomb: {fileID: 21300000, guid: b91d425f3c7c2674daa1581a3b7662ef, type: 3}
   _Blank: {fileID: 21300000, guid: 4783f811a618f66419def91d180e648a, type: 3}
-  img: {fileID: 0}
+  img: {fileID: 8919552067231987626}

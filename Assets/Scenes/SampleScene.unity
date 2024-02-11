@@ -238,7 +238,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 300, y: 0}
   m_SizeDelta: {x: 590, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &159211461
@@ -1611,8 +1611,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Title: {fileID: 1338059348}
-  BestTime: {fileID: 0}
+  BestTime: {fileID: 950070088}
+  BestTimeDisplay: {fileID: 1000988365}
   Screen: {fileID: 1723676817}
+  WinString: WINNER
+  LoseString: LOSER
   WinColor: {r: 0.07450981, g: 0.7921569, b: 0.09411765, a: 1}
   LooseColor: {r: 0.7921569, g: 0.07450981, b: 0.09411765, a: 1}
 --- !u!114 &1528285055
@@ -2209,7 +2212,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 295, y: 0}
   m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &2089641287
@@ -2334,21 +2337,16 @@ MonoBehaviour:
   ColumnCount: 30
   GameBody: {fileID: 2106200038}
   MaxBombCount: 99
-  BombsAdded: 0
-  Happy: {fileID: 21300000, guid: dfef7b713a2fd6f448ab0b5e802dde04, type: 3}
-  Dead: {fileID: 21300000, guid: 66c07caeb378b65479e223aef6a1009f, type: 3}
-  Shock: {fileID: 21300000, guid: 85389a5616eb337418456e9cc1de7a17, type: 3}
-  Win: {fileID: 21300000, guid: f9773de5543792642900f3f764e02e85, type: 3}
+  FaceSprites:
+  - {fileID: 21300000, guid: dfef7b713a2fd6f448ab0b5e802dde04, type: 3}
+  - {fileID: 21300000, guid: 85389a5616eb337418456e9cc1de7a17, type: 3}
+  - {fileID: 21300000, guid: 66c07caeb378b65479e223aef6a1009f, type: 3}
+  - {fileID: 21300000, guid: f9773de5543792642900f3f764e02e85, type: 3}
   TopFace: {fileID: 1409406675}
   _GameState: 0
-  AllowedFlags: 99
-  usedFlags: 0
   FlagText: {fileID: 372692272}
-  PC: {fileID: 1528285054}
   OldIndex: []
   _Timer: {fileID: 1574060070}
-  _BestTime: {fileID: 950070088}
-  _BestTimeDisplay: {fileID: 1000988365}
 --- !u!1 &2112039856
 GameObject:
   m_ObjectHideFlags: 0

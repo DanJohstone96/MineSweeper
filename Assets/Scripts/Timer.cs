@@ -5,40 +5,47 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
-    // Reference to the timer text component
-    public Text TimeText;
-    
-    // Float used to store the current game time
-    public float TimeCounter = 1;
+    [SerializeField]
+    private Text TimeText;
 
-    // Reference to the board generator
-    public BoardGenerator Bg;
+    [SerializeField]
+    private float TimeCounter = 1;
+
+    private BoardGenerator Bg;
 
 	private void Awake()
 	{
-        // finds the board generator in the scene.
         Bg = FindObjectOfType<BoardGenerator>();
 	}
 
-    void Update()
+    private void Update()
     {
-        // if the game is running then update and format the timer display
-        if (Bg._GameState == BoardGenerator.GameState.Running) 
+        if (Bg.ReturnGameState() == BoardGenerator.GameState.Running) 
         {
             TimeCounter += Time.deltaTime;
             TimeText.text = Mathf.Floor(TimeCounter).ToString("000");
         }
 
-        // if the user has lost or run out of time then stop the timer and end the game
-        if (TimeCounter >= Mathf.Floor(999) && Bg._GameState != BoardGenerator.GameState.Lost) 
+        if (TimeCounter >= Mathf.Floor(999) && Bg.ReturnGameState() != BoardGenerator.GameState.Lost) 
         {
             Bg.RevealAllBombs(null);
-            Bg.Loose();
-            Bg.PC.Open(false);
+            Bg.Loss();
+            PopupController.Instance.Open(false);
         }
     }
 
-    // Reset the timer
+    /// <summary>
+    /// Returns active timer
+    /// </summary>
+    /// <returns>Time elapsed</returns>
+    public float ReturnTime() 
+    {
+        return TimeCounter;
+    }
+
+    /// <summary>
+    /// Reset Timer
+    /// </summary>
 	public void Reset()
 	{
         TimeCounter = 1;

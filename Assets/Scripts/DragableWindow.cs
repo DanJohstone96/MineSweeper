@@ -11,18 +11,10 @@ public class DragableWindow : MonoBehaviour , IDragHandler
     [SerializeField]
     private Canvas Canvas;
 
-	// Start is called before the first frame update
-	void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    /// <summary>
+    /// Implementation of OnDrag From I Drag Handler interface, allows the score window to be moved.
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnDrag(PointerEventData eventData)
     {
         if (!transform.GetChild(0).gameObject.activeInHierarchy) 

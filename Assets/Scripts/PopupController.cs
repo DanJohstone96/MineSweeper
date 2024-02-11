@@ -5,42 +5,74 @@ using UnityEngine.UI;
 
 public class PopupController : MonoBehaviour
 {
-	// Reference to the title text of the popup box
-	public Text Title;
+    public static PopupController Instance { get; private set; }
 
-    public Text BestTime;
+    [SerializeField]
+	private Text Title;
 
-	// Reference to the Popups gameobject
-	public GameObject Screen;
+    [SerializeField]
+    private Text BestTime;
 
-    // Text colour to use if the user wins or loses
-	public Color WinColor;
-	public Color LooseColor;
+    [SerializeField]
+    private GameObject BestTimeDisplay;
+
+    [SerializeField]
+    private GameObject Screen;
+
+    [SerializeField]
+    private string WinString;
+    [SerializeField]
+    private string LoseString;
+
+    [SerializeField]
+    private Color WinColor;
+    [SerializeField]
+    private Color LooseColor;
+
+    private RectTransform DisplayRect;
 
 	private void Awake()
 	{
-        // ensures the popup is closed at start
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+
+        DisplayRect = Screen.GetComponent<RectTransform>();
         Close();
 	}
 
     // openes up the popup and sets the text and colour based on the result passed in.
+    /// <summary>
+    /// Open popup and set styling based on result param
+    /// </summary>
+    /// <param name="Result">if true game won</param>
 	public void Open(bool Result) 
     {
         transform.localPosition = Vector3.zero;
         Screen.SetActive(true);
-        if (Result)
-        {
-            Title.color = WinColor;
-            Title.text = "WINNER";
-        }
-        else 
-        {
-            Title.color = LooseColor;
-            Title.text = "LOSER";
-        }
+        Title.color = Result ? WinColor : LooseColor;
+        Title.text = Result ? WinString : LoseString;
+        BestTimeDisplay.SetActive(Result);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(DisplayRect);
     }
 
-    //closes the popup
+    /// <summary>
+    /// Sets the String of the Best Time Display. 
+    /// </summary>
+    /// <param name="bestTime">String to be displayed in the best time display</param>
+    public void SetBestTimeString(string bestTime) 
+    {
+        BestTime.text = bestTime;
+    }
+
+    /// <summary>
+    /// Used to close the popup.
+    /// </summary>
     public void Close() 
     {
         Screen.SetActive(false);
